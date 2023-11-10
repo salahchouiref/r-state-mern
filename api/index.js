@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import userRouter from "./routes/user.route.js";
 dotenv.config();
 
 const app = express();
@@ -18,4 +19,6 @@ databaseConnection();
 
 app.listen(3000,()=>{
     console.log("app is running on : http://localhost:3000");
-})
+});
+
+app.use("/api/user",userRouter);
