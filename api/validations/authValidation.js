@@ -1,5 +1,3 @@
-// validation/userValidation.js
-
 import { body, validationResult } from 'express-validator';
 import { errorHandler } from '../utils/errorHandler.js';
 
@@ -13,7 +11,6 @@ export const userValidationRules = () => {
 
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     const validationErrors = errors.array().map((error) => error.msg);
     const error = errorHandler(400, 'Validation failed');
