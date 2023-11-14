@@ -1,7 +1,6 @@
 import User from "../models/User.model.js";
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/errorHandler.js";
-import jwt from "jsonwebtoken";
 import { createToken } from "../utils/token.js";
 
 export const signup = async (req, res, next) => {
@@ -34,4 +33,27 @@ export const signin = async (req,res,next)=>{
   }catch(err){
     next(err);
   }
-}
+};
+
+export const google = async (req,res,next) =>{
+  try{
+      const user = await User.findOne({email:req.body.email});
+      if(user){
+          const tokenInfos = createToken(user);
+          res.cookie('accessToken',tokenInfos.token,{httpOnly : true,expires:tokenInfos.expiryDate}).status(200).json(tokenInfos.rest);
+      }else{
+          const generatedPassword = Math.random().toString(36).slice(-8)+Math.random().toString(36).slice(-8);
+          const hashedPassword = bcryptjs.hashSync(generatedPassword,10);
+          const newUser = new User({
+              username : req.body.name.split(" ").join("").toLowerCase()+Math.random().toString(36).slice(-8),
+              email : req.body.email,
+              password : hashedPassword,
+              profilePicture : req.body.photo });
+          await newUser.save();
+          const tokenInfos = createToken(newUser);
+          res.cookie('accessToken',tokenInfos.token,{httpOnly : true,expires:tokenInfos.expiryDate}).status(200).json(tokenInfos.rest);
+      }
+  }catch(err){
+      next(err);
+  }
+};
