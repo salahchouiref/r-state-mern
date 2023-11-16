@@ -3,8 +3,8 @@ import { errorHandler } from '../utils/errorHandler.js';
 
 export const userUpdateValidationRules = () => {
   return [
-    body('username').trim().isLength({ min: 1 }).escape(),
-    body('email').isEmail().normalizeEmail(),
+    body('username').optional().trim().isLength({ min: 1 }).escape(),
+    body('email').optional().isEmail().normalizeEmail(),
     body('password').optional().isLength({ min: 5 }).escape(),
     body('profilePicture').optional().isURL().withMessage('Invalid photo URL'),
   ];
