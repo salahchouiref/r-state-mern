@@ -27,6 +27,7 @@ export default function Profile() {
     const filename = new Date().getTime() + image.name;
     const storageRef = ref(storage, filename);
     const uploadTask = uploadBytesResumable(storageRef, image);
+    setImageError(false);
     uploadTask.on(
       'state_changed',
       (snapshot) => {
@@ -53,7 +54,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
+    
     // Frontend validation
     const validationErrors = {};
 
@@ -86,10 +87,8 @@ if (Object.keys(validationErrors).length > 0) {
 }
 
 
-    console.log(formData);
-    console.log(true);
      /// we stop here for test
-    /*try {
+    try {
       dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${user.currentUser._id}`, {
         method: 'POST',
@@ -107,7 +106,7 @@ if (Object.keys(validationErrors).length > 0) {
       setUpdateSuccess(true);
     } catch (err) {
       updateUserFailure(err);
-    } */
+    } 
   };
 
   return (
