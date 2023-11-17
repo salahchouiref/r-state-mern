@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRef } from 'react';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
-import { updateUserStart, updateUserSuccess, updateUserFailure } from '../redux/user/userSlice';
+import { updateUserStart, updateUserSuccess, updateUserFailure , deleteUserStart , deleteUserSuccess , deleteUserFailure} from '../redux/user/userSlice';
 
 export default function Profile() {
   const user = useSelector((state) => state.user);
@@ -99,15 +99,37 @@ if (Object.keys(validationErrors).length > 0) {
       });
       const data = await res.json();
       if (data.success === false) {
-        updateUserFailure(data);
+        dispatch(updateUserFailure(err));
         return;
       }
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
     } catch (err) {
-      updateUserFailure(err);
+      dispatch(updateUserFailure(err));
     } 
   };
+
+  const handleDelete = async (e) =>{
+    e.preventDefault();
+    const c = confirm("Do you want really delete you're account ? ");
+    if(!c){
+      return;
+    }
+    try{
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${user.currentUser._id}`,{
+        method : "DELETE",
+      });
+      const data = await res.json();
+      if(data.success == false){
+        dispatch(deleteUserFailure(data));
+        return ;
+      }
+      dispatch(deleteUserSuccess());
+    }catch(err){
+      dispatch(deleteUserFailure(err))
+    }
+  }
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -173,7 +195,7 @@ if (Object.keys(validationErrors).length > 0) {
       </button>
     </form>
     <div className='flex justify-between mt-3 font-bold'>
-      <span className='text-red-500 cursor-pointer'>Delete Account</span>
+      <span className='text-red-500 cursor-pointer' onClick={handleDelete}>Delete Account</span>
       <span className='text-red-500 cursor-pointer'>Sign out</span>
     </div>
     <p className='text-red-700 mt-3'>{user.error && 'Something went wrong!'}</p>
