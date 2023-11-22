@@ -1,17 +1,35 @@
 import { useState } from 'react';
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
 import {app} from "../firebase";
+import { useSelector } from 'react-redux';
+import {useNavigate} from "react-router-dom";
 
 export default function CresetateListing() {
+  const {currentUser} = useSelector(state=>state.user);
   const [files,setFiles] = useState([]);
   const [formData,setFormData] = useState({
     imageUrls : [],
+    name : "",
+    description : "",
+    address : "",
+    type : "rent",
+    bedrooms : 1,
+    bathrooms : 1,
+    regularPrice : 50,
+    discountPrice : 0,
+    offer : false,
+    parking : false,
+    furnished : false,
   }); 
   const [imageUploadError,setImageUploadError] = useState(null);
   const [uploading,setUploading] = useState(false);
   const [uploadingSuccess,setUploadingSuccess] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const [loadingSuccess,setLoadingSuccess] = useState(false);
+  const [loadingError,setLoadingError] = useState(false);
+  const [errorMessage,setErrorMessage] = useState(null);
   const [imagePreviews, setImagePreviews] = useState([]);
-
+  const navigate = useNavigate();
   const handleImageChange = (e) => {
     const selectedFiles = e.target.files;
     setFiles(selectedFiles);
@@ -24,6 +42,8 @@ export default function CresetateListing() {
 
   const handleImageSubmit = (e) =>{
     if(files.length>0 && files.length + formData.imageUrls.length <7){
+      setErrorMessage(null);
+      setLoadingError(false);
       setUploading(true);
       setImageUploadError(false);
       const promises = [];
@@ -59,7 +79,6 @@ export default function CresetateListing() {
           "state_changed",
           (snapshot)=>{
             const progress = (snapshot.bytesTransferred/snapshot.totalBytes) * 100;
-            console.log(progress);
           },
           (error)=>{
             reject(error);
@@ -67,7 +86,6 @@ export default function CresetateListing() {
           ()=>{
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL)=>{
               resolve(downloadURL);
-              console.log(downloadURL);
             });
           }
         )
@@ -87,62 +105,132 @@ export default function CresetateListing() {
     const updatedFiles = [...files];
     updatedFiles.splice(index, 1);
     setFiles(updatedFiles);
-    console.log(files);
   };
+
+  const handleChange = (e) => {
+    if(e.target.id === "sale" || e.target.id === "rent"){
+      setFormData({
+        ...formData,
+        type : e.target.id
+      });
+    }
+    
+    if(e.target.id === "parking" || e.target.id === "furnished" || e.target.id === "offer"){
+      setFormData({
+        ...formData,
+        [e.target.id] : e.target.checked
+      });
+    }
+    
+    if(e.target.id === "sale" || e.target.id === "rent"){
+      setFormData({
+        ...formData,
+        type : e.target.id
+      })
+    }
+    
+    if(e.target.type === "number" || e.target.type === "text" || e.target.type === "textarea"){
+      setFormData({
+        ...formData,
+        [e.target.id] : isNaN(e.target.value)?e.target.value:Number(e.target.value)
+      });
+    }
+  };
+
+  const handleSubmit = async (e) =>{
+      e.preventDefault();
+      if(formData.imageUrls.length<1){
+        setLoadingError(true); 
+        setErrorMessage("You must upload at least one image"); 
+        return;
+      }
+      if(+formData.regularPrice <= +formData.discountPrice){
+        setLoadingError(true); 
+        setErrorMessage("The discount price must be less than the regular price"); 
+        return;
+      }
+      try{
+        setLoading(true);
+        setLoadingError(false);
+        const res = await fetch("/api/listing/create",{
+          method : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({...formData , userRef : currentUser._id}),
+        });
+        const data = await res.json();
+        if(data.success === false){
+          setLoading(false);
+          setLoadingError(true); 
+          setErrorMessage(data.message); 
+          return;
+        }
+        setLoading(false);
+        setErrorMessage(null);
+        setLoadingSuccess(true);
+        navigate(`/listing/${data._id}`); 
+
+      }catch(err){
+        setLoading(false);
+        setLoadingError(true);
+        setErrorMessage(err);
+      }
+  }
 
   return (
     <main className='p-3 max-w-4xl mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Create a Listing</h1>
-      <form className='flex flex-col sm:flex-row gap-4'>
+      <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-4'>
         <div className='flex flex-col gap-4 flex-1'>
-          <input type='text' placeholder='Name' className='border p-3 rounded-lg bg-slate-50' id='name' maxLength="62" minLength="10" required />
-          <textarea type='text' placeholder='Description' className='border p-3 rounded-lg bg-slate-50' id='description' required />
-          <input type='text' placeholder='Adress' className='border p-3 rounded-lg bg-slate-50' id='adress'  required />
+          <input type='text' placeholder='Name' className='border p-3 rounded-lg bg-slate-50' id='name' maxLength="62" minLength="10" required value={formData.name}  onChange={handleChange}/>
+          <textarea type='text' placeholder='Description' className='border p-3 rounded-lg bg-slate-50' id='description' required value={formData.description}  onChange={handleChange}/>
+          <input type='text' placeholder='Address' className='border p-3 rounded-lg bg-slate-50' id='address'  required value={formData.address}  onChange={handleChange}/>
           <div className='font-semibold flex gap-6 flex-wrap'>
               <div className='flex gap-2'>
-              <input type='checkbox' id='sale' className='w-5' />
+              <input type='checkbox' id='sale' className='w-5' checked={formData.type === "sale"}  onChange={handleChange}/>
               <span>Sell</span>
               </div>
               <div className='flex gap-2'>
-              <input type='checkbox' id='rent' className='w-5' />
+              <input type='checkbox' id='rent' className='w-5' checked={formData.type === "rent"}  onChange={handleChange} />
               <span>Rent</span>
               </div>
               <div className='flex gap-2'>
-              <input type='checkbox' id='parking' className='w-5' />
+              <input type='checkbox' id='parking' className='w-5' checked={formData.parking}  onChange={handleChange} />
               <span>Parking spot</span>
               </div>
               <div className='flex gap-2'>
-              <input type='checkbox' id='furnished' className='w-5' />
+              <input type='checkbox' id='furnished' className='w-5' checked={formData.furnished}  onChange={handleChange}/>
               <span>Furnished</span>
               </div>
               <div className='flex gap-2'>
-              <input type='checkbox' id='offer' className='w-5' />
+              <input type='checkbox' id='offer' className='w-5' checked={formData.offer}  onChange={handleChange}/>
               <span>Offer</span>
               </div>
           </div>
           <div className='font-semibold flex flex-wrap gap-6'>
             <div className='flex items-center gap-2'>
-              <input type='number' id='bedrooms' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' />
+              <input type='number' id='bedrooms' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' value={formData.bedrooms} onChange={handleChange}/>
               <p>Beds</p>
             </div>
             <div className='flex items-center gap-2'>
-              <input type='number' id='bathrooms' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' />
+              <input type='number' id='bathrooms' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' value={formData.bathrooms} onChange={handleChange} />
               <p>Baths</p>
             </div>
             <div className='flex items-center gap-2'>
-              <input type='number' id='regularPrice' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' />
+              <input type='number' id='regularPrice' min="50" max="1000000" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' value={formData.regularPrice} onChange={handleChange}/>
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
                 <span className='text-xs'>($ /month)</span>
               </div>
             </div>
-            <div className='flex items-center gap-2'>
-              <input type='number' id='discountPrice' min="1" max="10" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' />
+            {formData.offer && (<div className='flex items-center gap-2'>
+              <input type='number' id='discountPrice' min="0" max="1000000" required className='p-3 border border-gray-300 bg-slate-50 rounded-lg' value={formData.discountPrice} onChange={handleChange} />
               <div className="flex flex-col items-center">
                <p>Discounted price</p>
                <span className='text-xs'>($ /month)</span>
               </div>
-            </div>
+            </div>)}
           </div>
         </div>
         <div className="flex flex-col flex-1 gap-4">
@@ -197,7 +285,13 @@ export default function CresetateListing() {
               </button>
             </div>
           ))}
-          <button className='p-3 bg-violet-700 text-white uppercase rounded-lg hover:opacity-80 disabled:opacity-70 '>Create Listing</button>
+          <button className='p-3 bg-violet-700 text-white uppercase rounded-lg hover:opacity-80 disabled:opacity-70' disabled={loading || uploading}>
+            {
+              loading ? "... Saving" : "Create Listing"
+            }
+          </button>
+          { loadingError && <p className='text-red-700 text-sm font-semibold'>{errorMessage}</p> }
+          { loadingSuccess && <p className='text-green-700 text-sm font-semibold'>Listing  saved successfuly</p>}
       </div>
       </form>
     </main>
