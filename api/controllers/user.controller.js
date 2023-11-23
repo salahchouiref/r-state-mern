@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/errorHandler.js";
 import User from "../models/User.model.js";
-
+import Listing from "../models/Listing.model.js";
 export const test = (req,res)=>{
     res.json({message : "api test is working"});
 };
@@ -32,6 +32,16 @@ export const deleteUser = async (req,res,next)=>{
     try{
         await User.findByIdAndDelete(req.params.id);
         res.status(200).json("Account deleted successfuly");
+    }catch(err){
+        next(err);
+    }
+};
+
+export const getUserListings = async (req,res,next) => {
+    if(req.user.id !== req.params.id) return next(errorHandler(403,"You can view only you're listings"));
+    try{
+        const listings = await Listing.find({userRef:req.params.id});
+        res.status(201).json(listings);
     }catch(err){
         next(err);
     }
