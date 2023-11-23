@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch,useSelector } from "react-redux";
-import { signInStart,signInSuccess,signInFailed } from "../redux/user/userSlice";
+import { signInStart,signInFailed } from "../redux/user/userSlice";
 import OAuth from "../components/OAuth";
+import {setUserWithTimer} from "../redux/store";
 
 
 export default function SignIn() {
@@ -60,7 +61,7 @@ export default function SignIn() {
         dispatch(signInFailed(data.message));
         return;
       }
-      dispatch(signInSuccess(data));
+      setUserWithTimer(data);
       navigate("/profile");
     } catch (err) {
       setLoading(false);
