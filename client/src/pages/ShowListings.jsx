@@ -1,0 +1,151 @@
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+
+export default function ShowListings() {
+  const [error, setError] = useState(null);
+  const [listings, setListings] = useState([]);
+  const [filteredType, setFilteredType] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [listingsPerPage] = useState(3);
+  const [loading, setLoading] = useState(true); // Added loading state
+  const { currentUser } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    getListings();
+  }, [filteredType, searchTerm, currentPage]);
+
+  const getListings = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/user/listings/${currentUser._id}`, {
+        method: "GET",
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        setError(data.message);
+      } else {
+        const filteredListings = data.filter((listing) => {
+          if (filteredType === "all" || listing.type === filteredType) {
+            return listing.name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          }
+          return false;
+        });
+
+        setListings(filteredListings);
+        console.log(filteredListings);
+      }
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const indexOfLastListing = currentPage * listingsPerPage;
+  const indexOfFirstListing = indexOfLastListing - listingsPerPage;
+  const currentListings = listings.slice(
+    indexOfFirstListing,
+    indexOfLastListing
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  return (
+    <div className="p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border px-4 py-2 rounded focus:outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select
+            className="border px-4 py-2 rounded focus:outline-none"
+            value={filteredType}
+            onChange={(e) => setFilteredType(e.target.value)}
+          >
+            <option value="all">All Types</option>
+            <option value="sale">For Sale</option>
+            <option value="rent">For Rent</option>
+          </select>
+        </div>
+        
+      </div>
+
+      <table className="w-full border">
+        <thead>
+          <tr>
+            <th className="p-3 border">Name</th>
+            <th className="p-3 border">Image</th>
+            <th className="p-3 border">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="text-center">
+          {loading ? (
+            <tr>
+              <td colSpan="3" className="p-2 border text-center">
+                Loading...
+              </td>
+            </tr>
+          ) : currentListings.length > 0 ? (
+            currentListings.map((listing) => (
+              <tr key={listing.id}>
+                <td className="p-3 border">{listing.name}</td>
+                <td className="p-3 border">
+                  <img
+                    src={listing.imageUrls[0]}
+                    alt={listing.name}
+                    className="w-40 h-30 mx-auto object-cover rounded"
+                  />
+                </td>
+                <td className="p-3 border ">
+                    <div className="flex items-center justify-center space-x-2">
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-80">
+                        Edit
+                      </button>
+                      <button className="bg-red-500 text-white px-4 py-2 rounded hover:opacity-80">
+                        Delete
+                      </button>
+                    </div>
+                  
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3" className="p-2 border text-center">
+                No listings to show.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {listings.length > listingsPerPage && (
+        <div className="mt-4 flex justify-center">
+          {Array.from({
+            length: Math.ceil(listings.length / listingsPerPage),
+          }).map((_, index) => (
+            <button
+              key={index + 1}
+              className={`bg-gray-300 text-gray-600 px-4 py-2 hover:opacity-90 rounded mx-2 ${
+                currentPage === index + 1 && "bg-gray-600 text-white"
+              }`}
+              onClick={() => paginate(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && <div className="text-red-500 mt-4">{error}</div>}
+    </div>
+  );
+}

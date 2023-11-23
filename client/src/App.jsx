@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import ProfilePrivateRoute from "./components/ProfilePrivateRoute";
 import AuthPrivateRoute from "./components/AuthPrivateRoute";
 import CreateListing from "./pages/CreateListing";
+import ShowListings from "./pages/ShowListings";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route element={<ProfilePrivateRoute />} >
           <Route path="/profile" element={<Profile />}></Route>
           <Route path="/create-listing" element={<CreateListing />}></Route>
+          <Route path="/show-listings" element={<ShowListings />}></Route>
         </Route>
         <Route element={<AuthPrivateRoute/>} >
           <Route path="/sign-in" element={<SignIn />}></Route>

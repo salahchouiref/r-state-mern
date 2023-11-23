@@ -209,16 +209,22 @@ if (Object.keys(validationErrors).length > 0) {
       >
         {user.loading ? 'loading ...' : 'update'}
       </button>
-      <Link to={"/create-listing"} className='bg-green-700 text-white rounded-lg text-center uppercase p-3 hover:opacity-50'>
-          Create Listing
-      </Link>
+      <div className='flex flex-wrap gap-2'>
+  <Link to={"/create-listing"} className='flex-1 bg-green-700 text-white rounded-lg text-center uppercase p-3 hover:opacity-50'>
+    Create Listing
+  </Link>
+  <Link to={"/show-listings"} className='flex-1 bg-yellow-300 rounded-lg text-center uppercase p-3 hover:opacity-50'>
+    Show Listings
+  </Link>
+</div>
+
     </form>
     <div className='flex justify-between mt-3 font-bold'>
       <span className='text-red-500 cursor-pointer' onClick={handleDelete}>Delete Account</span>
       <span className='text-red-500 cursor-pointer' onClick={handleSignOut}>Sign out</span>
     </div>
     <p className='text-red-700 mt-3'>{user.error && 'Something went wrong!'}</p>
-    <p className='text-green-700 mt-3'>{updateSuccess && 'User updated successfully'}</p>
+    <p className='text-green-700 mt-3'>{updateSuccess!==false && 'User updated successfully'}</p>
   </div>
   );
 }
