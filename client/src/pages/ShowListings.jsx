@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 export default function ShowListings() {
   const [error, setError] = useState(null);
@@ -54,6 +55,47 @@ export default function ShowListings() {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const handleDelete = async (listingId) => {
+    // Show a confirmation dialog
+    const { value } = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+  
+    if (value) {
+      try {
+        const res = await fetch(`/api/listing/delete/${listingId}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        console.log(data);
+        if (data.success === false) {
+          return Swal.fire(
+            "Error",
+            "There was an error deleting your listing. Please try again.",
+            "error"
+          );
+        }
+        setListings((prevListings) =>
+          prevListings.filter((listing) => listing._id !== listingId)
+        );
+        Swal.fire("Deleted!", "Your listing has been deleted.", "success"); 
+        
+      } catch (err) {
+        Swal.fire(
+          "Error",
+          "There was an error deleting your listing. Please try again.",
+          "error"
+        );
+      }
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
@@ -94,7 +136,7 @@ export default function ShowListings() {
               </td>
             </tr>
           ) : currentListings.length > 0 ? (
-            currentListings.map((listing) => (
+            currentListings.reverse().map((listing) => (
               <tr key={listing.id}>
                 <td className="p-3 border">{listing.name}</td>
                 <td className="p-3 border">
@@ -109,7 +151,7 @@ export default function ShowListings() {
                       <button className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-80">
                         Edit
                       </button>
-                      <button className="bg-red-500 text-white px-4 py-2 rounded hover:opacity-80">
+                      <button type="button" onClick={()=>handleDelete(listing._id)} className="bg-red-500 text-white px-4 py-2 rounded hover:opacity-80">
                         Delete
                       </button>
                     </div>
