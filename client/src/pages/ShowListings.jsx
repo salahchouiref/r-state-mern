@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 export default function ShowListings() {
   const [error, setError] = useState(null);
@@ -148,9 +149,9 @@ export default function ShowListings() {
                 </td>
                 <td className="p-3 border ">
                     <div className="flex items-center justify-center space-x-2">
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-80">
+                      <Link to={`/update-listing/${listing._id}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:opacity-80">
                         Edit
-                      </button>
+                      </Link>
                       <button type="button" onClick={()=>handleDelete(listing._id)} className="bg-red-500 text-white px-4 py-2 rounded hover:opacity-80">
                         Delete
                       </button>
