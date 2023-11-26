@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
+import { deleteObject, getStorage , ref } from "firebase/storage";
+import { app } from "../firebase";
 
 export default function ShowListings() {
   const [error, setError] = useState(null);
@@ -56,6 +58,18 @@ export default function ShowListings() {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const deleteImages = async (listingId) => {
+    const storage = getStorage(app);
+    await listings.find(e=>e._id===listingId).imageUrls.map((e)=>{
+      const imageRef = ref(storage,e);
+      deleteObject(imageRef).then(()=>{
+        console.log(true);
+      }).then((err)=>{
+        console.log(err);
+      })
+    });
+  }; 
+
   const handleDelete = async (listingId) => {
     // Show a confirmation dialog
     const { value } = await Swal.fire({
@@ -67,8 +81,8 @@ export default function ShowListings() {
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
     });
-  
     if (value) {
+      deleteImages(listingId);
       try {
         const res = await fetch(`/api/listing/delete/${listingId}`, {
           method: "DELETE",
