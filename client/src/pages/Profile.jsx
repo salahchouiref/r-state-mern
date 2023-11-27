@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef } from 'react';
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable,deleteObject } from 'firebase/storage';
 import { app } from '../firebase';
 import { updateUserStart, updateUserSuccess, updateUserFailure , 
          deleteUserStart , deleteUserSuccess , deleteUserFailure , SignOut} from '../redux/user/userSlice';
@@ -27,7 +27,7 @@ export default function Profile() {
 
   const handleFileUpload = async (image) => {
     const storage = getStorage(app);
-    const filename = new Date().getTime() + image.name;
+    const filename = "mern-state-profile/"+new Date().getTime() + image.name;
     const storageRef = ref(storage, filename);
     const uploadTask = uploadBytesResumable(storageRef, image);
     setImageError(false);
@@ -89,7 +89,7 @@ if (Object.keys(validationErrors).length > 0) {
   return;
 }
 
-
+    
      /// we stop here for test
     try {
       dispatch(updateUserStart());
@@ -112,6 +112,18 @@ if (Object.keys(validationErrors).length > 0) {
     } 
   };
 
+  const deleteImageFromFirebase = async (imageUrl) => {
+    if(imageUrl.includes("mern-state-profile")){
+      const storage = getStorage(app);
+      const imageRef = ref(storage,imageUrl);
+      await deleteObject(imageRef).then(()=>{
+        console.log("Profile picture was deleted  successfuly");
+      }).catch((err)=>{
+        console.log(err);
+      });
+    }
+  }; 
+
   const handleDelete = async (e) =>{
     e.preventDefault();
     const { value } = await Swal.fire({
@@ -124,6 +136,7 @@ if (Object.keys(validationErrors).length > 0) {
       confirmButtonText: "Yes, delete it!",
     });
     if(!value) return;
+    deleteImageFromFirebase(user.currentUser.profilePicture);
     try{
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${user.currentUser._id}`,{
