@@ -10,6 +10,7 @@ import AuthPrivateRoute from "./components/AuthPrivateRoute";
 import CreateListing from "./pages/CreateListing";
 import ShowListings from "./pages/ShowListings";
 import UpdateListing from "./pages/UpdateListing";
+import Listing from "./pages/Listing";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />}></Route>
+        <Route path="/listing/:id" element={<Listing />}></Route>
         <Route element={<ProfilePrivateRoute />} >
           <Route path="/profile" element={<Profile />}></Route>
           <Route path="/create-listing" element={<CreateListing />}></Route>

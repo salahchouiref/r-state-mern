@@ -153,7 +153,9 @@ export default function ShowListings() {
           ) : currentListings.length > 0 ? (
             currentListings.reverse().map((listing) => (
               <tr key={listing.id}>
-                <td className="p-3 border">{listing.name}</td>
+                <td className="p-3 border">
+                  <Link className="hover:underline" to={`/listing/${listing._id}`}>{listing.name}</Link>
+                </td>
                 <td className="p-3 border">
                   <img
                     src={listing.imageUrls[0]}

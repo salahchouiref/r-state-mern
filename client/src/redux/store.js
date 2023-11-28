@@ -31,7 +31,6 @@ const clearUserAfter24Hours =  () => {
 
   setTimeout(() => {
     handleSignOut();
-    store.dispatch(SignOut());
   }, twentyFourHoursInMilliseconds);
 };
 
@@ -44,6 +43,7 @@ const handleSignOut = async (e) =>{
       if(data.success){
         console.log(data.message);
       };
+      store.dispatch(SignOut());
     }catch(err){
       console.log(err);
     }
