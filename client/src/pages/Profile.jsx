@@ -191,7 +191,7 @@ if (Object.keys(validationErrors).length > 0) {
         defaultValue={user.currentUser.username}
         id='username'
         placeholder='Username'
-        className={`bg-violet-100 rounded-lg p-3 ${
+        className={`bg-stone-200 rounded-lg p-3 ${
           errors.username ? 'border-red-500' : ''
         }`}
       />
@@ -204,7 +204,7 @@ if (Object.keys(validationErrors).length > 0) {
         defaultValue={user.currentUser.email}
         id='email'
         placeholder='Email'
-        className={`bg-violet-100 rounded-lg p-3 ${
+        className={`bg-stone-200 rounded-lg p-3 ${
           errors.email ? 'border-red-500' : ''
         }`}
       />
@@ -216,7 +216,7 @@ if (Object.keys(validationErrors).length > 0) {
         onChange={handleChange}
         id='password'
         placeholder='Password'
-        className={`bg-violet-100 rounded-lg p-3 ${
+        className={`bg-stone-200 rounded-lg p-3 ${
           errors.password ? 'border-red-500' : ''
         }`}
       />
@@ -225,7 +225,7 @@ if (Object.keys(validationErrors).length > 0) {
       )}
       <button
         disabled={user.loading}
-        className='bg-violet-600 p-3 text-white uppercase hover:opacity-60 rounded-lg disabled:opacity-30'
+        className='bg-stone-600 p-3 text-white uppercase hover:opacity-60 rounded-lg disabled:opacity-30'
       >
         {user.loading ? 'loading ...' : 'update'}
       </button>

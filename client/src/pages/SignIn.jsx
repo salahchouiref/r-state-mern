@@ -77,7 +77,7 @@ export default function SignIn() {
         {/* Remove the username input field */}
         <input
           type="email"
-          className={`bg-violet-50 p-3 rounded-lg ${errors.email ? "border-red-500" : ""}`}
+          className={`bg-stone-200 p-3 rounded-lg ${errors.email ? "border-red-500" : ""}`}
           placeholder="email"
           id='email'
           onChange={handleChange}
@@ -87,7 +87,7 @@ export default function SignIn() {
         )}
         <input
           type="password"
-          className={`bg-violet-50 p-3 rounded-lg ${errors.password ? "border-red-500" : ""}`}
+          className={`bg-stone-200 p-3 rounded-lg ${errors.password ? "border-red-500" : ""}`}
           placeholder="password"
           id='password'
           onChange={handleChange}
@@ -97,7 +97,7 @@ export default function SignIn() {
         )}
         <button
           disabled={loading ? true : false}
-          className="bg-violet-900 text-white p-2 rounded-l uppercase hover:opacity-80"
+          className="bg-stone-900 text-white p-2 rounded-l uppercase hover:opacity-80"
         >
           {(loading || user.loading) ? "Loading..." : "Sign in"}
         </button>

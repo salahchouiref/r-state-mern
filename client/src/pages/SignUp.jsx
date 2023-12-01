@@ -82,7 +82,7 @@ export default function SignUp() {
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input
           type="text"
-          className={`bg-violet-50 p-3 rounded-lg ${errors.username ? "border-red-500" : ""}`}
+          className={`bg-stone-200 p-3 rounded-lg ${errors.username ? "border-red-500" : ""}`}
           placeholder="username"
           id='username'
           onChange={handleChange}
@@ -92,7 +92,7 @@ export default function SignUp() {
         )}
         <input
           type="email"
-          className={`bg-violet-50 p-3 rounded-lg ${errors.email ? "border-red-500" : ""}`}
+          className={`bg-stone-200 p-3 rounded-lg ${errors.email ? "border-red-500" : ""}`}
           placeholder="email"
           id='email'
           onChange={handleChange}
@@ -102,7 +102,7 @@ export default function SignUp() {
         )}
         <input
           type="password"
-          className={`bg-violet-50 p-3 rounded-lg ${errors.password ? "border-red-500" : ""}`}
+          className={`bg-stone-200 p-3 rounded-lg ${errors.password ? "border-red-500" : ""}`}
           placeholder="password"
           id='password'
           onChange={handleChange}
@@ -112,7 +112,7 @@ export default function SignUp() {
         )}
         <button
           disabled={loading ? true : false}
-          className="bg-violet-900 text-white p-2 rounded-l uppercase hover:opacity-80"
+          className="bg-stone-900 text-white p-2 rounded-l uppercase hover:opacity-80"
         >
           {loading ? "Loading..." : "Sign up"}
         </button>

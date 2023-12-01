@@ -1,22 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {FaSearch} from "react-icons/fa";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {  useSelector } from 'react-redux';
 
 export default function Header() {
     const user = useSelector(state=>state.user);
+    const [searchTerm,setSearchTerm] = useState('');
+    const navigate = useNavigate();
+
+    const handleSubmit = (e) => {           
+        e.preventDefault();
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('searchTerm',searchTerm);
+        const searchQuery = urlParams.toString();
+        navigate(`/search?${searchQuery}`);
+    };
+
+    useEffect(()=>{
+       const urlParams = new URLSearchParams(location.search);
+       const searchTermFormUrl = urlParams.get('searchTerm');
+       if(searchTermFormUrl){
+        setSearchTerm(searchTermFormUrl);
+       } 
+    },[location.search]);
   return (
-    <header className='bg-violet-200 shadow-md'>
+    <header className='bg-stone-200 shadow-md'>
      <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
         <Link to="/">
             <h1 className='font-bold text-sm sm:text-xl flex flex-wrap'>
-                <span className='text-violet-400'>Sech</span>
-                <span className='text-violet-800'>R-state</span>
+                <span className='text-stone-400'>Sech</span>
+                <span className='text-stone-800'>R-state</span>
             </h1>
         </Link>
-        <form className='bg-violet-100 p-3 rounded-lg flex items-center'>
-            <input type='text' placeholder='search...' className='bg-transparent focus:outline-none w-24 sm:w-64' />
-            <FaSearch className='text-violet-500' />
+        <form className='bg-stone-100 p-3 rounded-lg flex items-center' onSubmit={handleSubmit}>
+            <input type='text' placeholder='search...' className='bg-transparent focus:outline-none w-24 sm:w-64' value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} />
+            <button>
+                <FaSearch className='text-stone-500' />
+            </button>
         </form>
         <ul className='flex gap-4'>
             <Link to="/">
